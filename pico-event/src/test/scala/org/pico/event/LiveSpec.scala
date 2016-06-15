@@ -42,5 +42,62 @@ class LiveSpec extends Specification {
       bus1.publish(5)
       result.value must_=== 8
     }
+
+    "have applyIn operation on two arguments" in {
+      val bus1 = Bus[Int]
+      val bus2 = Bus[Int]
+      val live1 = bus1.latest(0)
+      val live2 = bus2.latest(0)
+
+      val result = (live1, live2).applyIn(_ + _)
+
+      result.value must_=== 0
+      bus1.publish(2)
+      result.value must_=== 2
+      bus2.publish(3)
+      result.value must_=== 5
+      bus1.publish(5)
+      result.value must_=== 8
+    }
+
+    "have applyIn operation on three arguments" in {
+      val bus1 = Bus[Int]
+      val bus2 = Bus[Int]
+      val bus3 = Bus[Int]
+      val live1 = bus1.latest(0)
+      val live2 = bus2.latest(0)
+      val live3 = bus3.latest(0)
+
+      val result = (live1, live2, live3).applyIn(_ + _ + _)
+
+      result.value must_=== 0
+      bus1.publish(2)
+      result.value must_=== 2
+      bus2.publish(3)
+      result.value must_=== 5
+      bus1.publish(5)
+      result.value must_=== 8
+    }
+
+    "have applyIn operation on three arguments" in {
+      val bus1 = Bus[Int]
+      val bus2 = Bus[Int]
+      val bus3 = Bus[Int]
+      val bus4 = Bus[Int]
+      val live1 = bus1.latest(0)
+      val live2 = bus2.latest(0)
+      val live3 = bus3.latest(0)
+      val live4 = bus4.latest(0)
+
+      val result = (live1, live2, live3, live4).applyIn(_ + _ + _ + _)
+
+      result.value must_=== 0
+      bus1.publish(2)
+      result.value must_=== 2
+      bus2.publish(3)
+      result.value must_=== 5
+      bus1.publish(5)
+      result.value must_=== 8
+    }
   }
 }

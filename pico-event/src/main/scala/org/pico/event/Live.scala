@@ -7,7 +7,7 @@ import org.pico.disposal.{Closed, Disposer}
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
 import org.pico.event.syntax.source._
-import org.pico.fp.Monad
+import org.pico.fp._
 
 /** A value that may change over time.  There is also an event source that emits the new value every
   * time the value changes.

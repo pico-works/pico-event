@@ -40,15 +40,17 @@ class BusSpec extends Specification {
     }
 
     "should implement map" ! {
+      val disposer = Disposer()
       val es = Bus[Int]
       val fs = es.map(_ + 1)
       var esValues = List.empty[Int]
       var fsValues = List.empty[Int]
-      es.subscribe(v => esValues ::= v)
-      fs.subscribe(v => fsValues ::= v)
+      disposer += es.subscribe(v => esValues ::= v)
+      disposer += fs.subscribe(v => fsValues ::= v)
       es.publish(10)
       esValues must_=== List(10)
       fsValues must_=== List(11)
+      System.gc()
       es.publish(20)
       esValues must_=== List(20, 10)
       fsValues must_=== List(21, 11)

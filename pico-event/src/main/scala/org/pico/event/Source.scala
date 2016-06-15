@@ -23,6 +23,13 @@ trait Source[+A] extends Disposer { self =>
     }
   }
 
+  /** Side effect to execute when an event occurs.
+    *
+    * @param f The side effecting function
+    * @return a source that emits the same events after the side effect has been performed
+    */
+  def effect(f: A => Unit): Source[A] = self.map { a => f(a); a }
+
   /** From a function that maps each event into an iterable event, create a new Source that will
     * emit each element of the iterable event.
     */
