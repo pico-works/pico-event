@@ -78,3 +78,22 @@ To dispose a `Source` means all subscriptions listening on it for events will be
 events will be emitted.
 
 To dispose a `Sink` means that all calls to `publish` will be ignored.
+
+## Observable Variables
+Observable variables have the type `Var[A]`.  They can be created by calling the
+companion object constructor method with an initial value like this:
+
+    val counter = Var[Long](0)
+
+And updated using the `value` property:
+
+    counter.value = 1
+
+It has semantics much like the `AtomicReference` type in the standard Java library,
+so you can perform the same kinds of atomic operations like the following:
+
+    counter.getAndSet(1)
+    counter.update(_ + 1)
+    val success = counter.compareAndSet(1, 2)
+
+

@@ -47,6 +47,7 @@ class BusSpec extends Specification {
       var fsValues = List.empty[Int]
       disposer += es.subscribe(v => esValues ::= v)
       disposer += fs.subscribe(v => fsValues ::= v)
+      System.gc()
       es.publish(10)
       esValues must_=== List(10)
       fsValues must_=== List(11)
@@ -65,6 +66,7 @@ class BusSpec extends Specification {
       disposer += aBus.mapConcat { case (n, s) => List.fill(n)(s) } into bBus
 
       val result = bBus.foldRight(List.empty[String])(_ :: _)
+      System.gc()
 
       aBus.publish(2 -> "A")
       aBus.publish(1 -> "B")
@@ -84,6 +86,7 @@ class BusSpec extends Specification {
 
       val ltValue = ltBus.foldRight(List.empty[String])(_ :: _)
       val rtValue = rtBus.foldRight(List.empty[Int])(_ :: _)
+      System.gc()
 
       inBus.publish(Left("A"))
       inBus.publish(Right(1))
@@ -105,6 +108,7 @@ class BusSpec extends Specification {
 
       val ltValue = ltBus.foldRight(List.empty[String])(_ :: _)
       val rtValue = rtBus.foldRight(List.empty[Int])(_ :: _)
+      System.gc()
 
       inBus.publish(Left("A"))
       inBus.publish(Right(1))
@@ -124,6 +128,7 @@ class BusSpec extends Specification {
       disposer += aBus into bBus
       disposer += bBus into cBus
       val result = cBus.foldRight(List.empty[Int])(_ :: _)
+      System.gc()
 
       aBus.publish(1)
       aBus.publish(2)
@@ -143,6 +148,7 @@ class BusSpec extends Specification {
       val rtBus = Bus[Int]
       val combinedBus = ltBus merge rtBus
       val result = combinedBus.foldRight(List.empty[Int])(_ :: _)
+      System.gc()
       ltBus.publish(0)
       rtBus.publish(1)
       ltBus.publish(2)
@@ -158,6 +164,7 @@ class BusSpec extends Specification {
       source.dispose()
       bus.publish(1)
       val result2 = source.foldRight(List.empty[Int])(_ :: _)
+      System.gc()
       bus.publish(2)
       result1.value must_=== List(0)
       result2.value must_=== List()
@@ -167,6 +174,7 @@ class BusSpec extends Specification {
       val bus = Bus[Int]
       val sink: Sink[Int] = bus.comap(_ * 100)
       val result1 = bus.foldRight(List.empty[Int])(_ :: _)
+      System.gc()
       sink.publish(0)
       sink.dispose()
       sink.publish(1)
@@ -176,6 +184,7 @@ class BusSpec extends Specification {
     "Disposed bus should no longer emit or publish events" ! {
       val bus = Bus[Int]
       val result = bus.foldRight(List.empty[Int])(_ :: _)
+      System.gc()
       bus.publish(0)
       bus.dispose()
       bus.publish(1)

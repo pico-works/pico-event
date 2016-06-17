@@ -19,7 +19,9 @@ object Var {
     val state = new AtomicReference[A](initial)
 
     new Var[A] { temp =>
-      override val source = Bus[A]
+      val _source = Bus[A]
+
+      override val source = _source
 
       override def value: A = state.get
 

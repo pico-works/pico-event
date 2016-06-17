@@ -33,7 +33,9 @@ trait SinkSource[-A, +B] extends Sink[A] with Source[B] { self =>
 }
 
 object SinkSource {
-  def apply[A, B](f: A => B): SinkSource[A, B] = new SimpleSinkSource[A, B] {
-    override val transform = f
+  def apply[A, B](f: A => B): SinkSource[A, B] = {
+    new SimpleSinkSource[A, B] {
+      override def transform = f
+    }
   }
 }

@@ -47,10 +47,12 @@ object Live {
 
       override val source = Bus[B]
 
-      temp.disposes(self.subscribe { e =>
-        val (_, newValue) = state.update(v => f(e, v))
-        source.publish(newValue)
-      })
+      temp.disposes {
+        self.subscribe { e =>
+          val (_, newValue) = state.update(v => f(e, v))
+          source.publish(newValue)
+        }
+      }
     }
   }
 
