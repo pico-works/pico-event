@@ -16,6 +16,7 @@ class BusSpec extends Specification {
       val source = bus.map{e => counter.addAndGet(e); e}
       val disposer = Disposer()
       disposer += source.subscribe(e => ())
+      System.gc()
 
       bus.publish(1)
       bus.publish(1)
@@ -31,6 +32,7 @@ class BusSpec extends Specification {
       val disposer = Disposer()
       disposer += source.subscribe(e => ())
       disposer += source.subscribe(e => ())
+      System.gc()
 
       bus.publish(1)
       bus.publish(1)

@@ -96,4 +96,9 @@ so you can perform the same kinds of atomic operations like the following:
     counter.update(_ + 1)
     val success = counter.compareAndSet(1, 2)
 
+Moreover, it exposes an event source that emits the new value after every value
+change:
+
+    val source: Event[Long] = counter.source
+
 

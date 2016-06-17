@@ -17,6 +17,8 @@ trait Live[A] extends Disposer {
 
   def source: Source[A]
 
+  def live: Live[A] = this
+
   def map[B](f: A => B): Live[B] = source.foldRight(f(value))((a, _) => f(a))
 }
 
@@ -46,6 +48,9 @@ object Live {
       override def value: B = state.get
 
       override val source = Bus[B]
+
+      this.releases(self)
+      source.releases(this)
 
       temp.disposes {
         self.subscribe { e =>
