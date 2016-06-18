@@ -7,6 +7,10 @@ import org.pico.disposal.syntax.disposable._
 import org.pico.disposal.{Closed, Disposer}
 
 trait Source[+A] extends Disposer { self =>
+  /** Get the Source representation of this.
+    */
+  def asSource: Source[A] = this
+
   /** Subscribe a subscriber to a source.  The subscriber will be invoked with any events that the
     * source may emit.
     */
@@ -70,6 +74,13 @@ trait Source[+A] extends Disposer { self =>
     temp += self.subscribe(a => if (f(a)) temp.publish(a))
   }
 
+  /** Merge to sources such that events emitted from the left source will be emitted in the Left
+    * case and events emitted from the right source will be emitted in the Right case.
+    *
+    * @param that The right source
+    * @tparam B The type of the right source events
+    * @return A new source that emits events from left and right sources.
+    */
   def or[B](that: Source[B]): Source[Either[A, B]] = {
     val temp = Bus[Either[A, B]]
     temp += self.subscribe(e => temp.publish(Left(e)))

@@ -7,7 +7,15 @@ import java.util.concurrent.atomic.{AtomicInteger, AtomicReference}
 import org.pico.atomic.syntax.std.atomicReference._
 import org.pico.disposal.OnClose
 
-trait BareSinkSource[A, B] extends SinkSource[A, B] {
+/** A simple SinkSource which implements subscriber tracking.
+  *
+  * This implementation does not release references have a well-defined closed state.
+  * The SimpleSinkSource wrapper type will properly define the closed state.
+  *
+  * @tparam A The sink event type
+  * @tparam B The source event type
+  */
+private trait BareSinkSource[A, B] extends SinkSource[A, B] {
   private final val subscribers = new AtomicReference(List.empty[WeakReference[B => Unit]])
   private final val garbage = new AtomicInteger(0)
 

@@ -22,8 +22,8 @@ class VarSpec extends Specification {
       val live2 = Var(0)
 
       val result = for {
-        a <- live1.live
-        b <- live2.live
+        a <- live1.asLive
+        b <- live2.asLive
       } yield a + b
 
       System.gc()
@@ -74,7 +74,7 @@ class VarSpec extends Specification {
       val var1 = Var[Int => Int](identity)
       val var2 = Var[Int](0)
 
-      val result = var1.live ap var2.live
+      val result = var1.asLive ap var2.asLive
       System.gc()
 
       result.value must_=== 0
@@ -92,7 +92,7 @@ class VarSpec extends Specification {
       val var1 = Var[Int](0)
       val var2 = Var[Int](0)
 
-      val result = var1.live.map[Int => Int](x => y => x + y) ap var2.live
+      val result = var1.asLive.map[Int => Int](x => y => x + y) ap var2.asLive
       System.gc()
 
       result.value must_=== 0
@@ -109,7 +109,7 @@ class VarSpec extends Specification {
       val var2 = Var(0)
       val var3 = Var(0)
 
-      val result = (var1.live, var2.live, var3.live).applyIn(_ + _ + _)
+      val result = (var1.asLive, var2.asLive, var3.asLive).applyIn(_ + _ + _)
       System.gc()
 
       result.value must_=== 0
@@ -127,7 +127,7 @@ class VarSpec extends Specification {
       val var3 = Var(0)
       val var4 = Var(0)
 
-      val result = (var1.live, var2.live, var3.live, var4.live).applyIn(_ + _ + _ + _)
+      val result = (var1.asLive, var2.asLive, var3.asLive, var4.asLive).applyIn(_ + _ + _ + _)
       System.gc()
 
       result.value must_=== 0

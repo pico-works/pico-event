@@ -10,6 +10,23 @@ import org.specs2.mutable.Specification
 
 class BusSpec extends Specification {
   "Bus" should {
+    "have dimap" in {
+      val bus1 = Bus[Int]
+      val counter1 = new AtomicInteger(0)
+      val counter2 = new AtomicInteger(0)
+      val bus2 = bus1.dimap[Int, Int]{e => counter1.addAndGet(e); e}{e => counter2.addAndGet(e); e}
+      val disposer = Disposer()
+      disposer += bus2.subscribe(e => ())
+      System.gc()
+
+      bus2.publish(1)
+      bus2.publish(1)
+      bus2.publish(1)
+
+      counter1.get() must_=== 3
+      counter2.get() must_=== 3
+    }
+
     "have map method that invokes function one for every publish when there is one subscriber" in {
       val bus = Bus[Int]
       val counter = new AtomicInteger(0)

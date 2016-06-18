@@ -10,32 +10,21 @@ import org.pico.disposal.std.autoCloseable._
   * before emitting the transformed event to subscribers.
   */
 trait SinkSource[-A, +B] extends Sink[A] with Source[B] { self =>
-  /** Create a new Sink that applies a function to the event before propagating it to the
-    * original sink.
-    */
-  override def comap[C](f: C => A): Sink[C] = new SinkSource[C, B] { temp =>
-    val thatRef = temp.swapDisposes(ClosedSinkSource, new AtomicReference(SinkSource[C, A](f)))
-    temp.disposes(thatRef.get().subscribe(self.publish))
-    override def subscribe(subscriber: B => Unit): Closeable = temp.subscribe(subscriber)
-    override def publish(event: C): Unit = thatRef.get().publish(event)
-  }
-
   /** Create a new Source that will emit transformed events that have been emitted by the original
     * Source.  The transformation is described by the function argument.
     */
-  override def map[C](f: B => C): SinkSource[A, C] = new SinkSource[A, C] { temp =>
-    val thatRef = temp.swapDisposes(ClosedSinkSource, new AtomicReference(SinkSource[B, C](f)))
-    val selfRef = temp.swapReleases(ClosedSinkSource, new AtomicReference(self))
-    temp.disposes(self.subscribe(thatRef.get().publish))
-    override def subscribe(subscriber: C => Unit): Closeable = thatRef.get().subscribe(subscriber)
-    override def publish(event: A): Unit = selfRef.get().publish(event)
+  final def dimap[C, D](f: C => A)(g: B => D): SinkSource[C, D] = new SinkSource[C, D] { temp =>
+    val cSinkRef    = temp.swapDisposes(ClosedSinkSource, new AtomicReference(self.comap(f)))
+    val dSourceRef  = temp.swapDisposes(ClosedSinkSource, new AtomicReference(self.map(g)))
+
+    cSinkRef  .get().disposes(temp)
+    dSourceRef.get().disposes(temp)
+
+    override def subscribe(subscriber: D => Unit): Closeable = dSourceRef.get().subscribe(subscriber)
+    override def publish(event: C): Unit = cSinkRef.get().publish(event)
   }
 }
 
 object SinkSource {
-  def apply[A, B](f: A => B): SinkSource[A, B] = {
-    new SimpleSinkSource[A, B] {
-      override def transform = f
-    }
-  }
+  def apply[A, B](f: A => B): SinkSource[A, B] = SimpleSinkSource(f)
 }

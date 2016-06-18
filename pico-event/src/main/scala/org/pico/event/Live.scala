@@ -13,12 +13,24 @@ import org.pico.fp._
   * time the value changes.
   */
 trait Live[A] extends Disposer {
+  /** Get the current value.
+    */
   def value: A
 
+  /** Get the source that emits the new value every time the value changes.
+    */
   def source: Source[A]
 
-  def live: Live[A] = this
+  /** Get this as a Live object.
+    */
+  def asLive: Live[A] = this
 
+  /** Map the value.
+    *
+    * @param f The mapping function
+    * @tparam B The return type of the mapping function
+    * @return New live object containing the mapped value
+    */
   def map[B](f: A => B): Live[B] = source.foldRight(f(value))((a, _) => f(a))
 }
 
