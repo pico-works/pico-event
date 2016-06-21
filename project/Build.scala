@@ -26,6 +26,10 @@ object Build extends sbt.Build {
     def testLibs(modules: ModuleID*) = self.libs(modules.map(_ % "test"): _*)
   }
 
+  lazy val `pico-fake` = Project(id = "pico-fake", base = file("pico-fake"))
+      .standard("Fake project").notPublished
+      .testLibs(specs2_core)
+
   lazy val `pico-event` = Project(id = "pico-event", base = file("pico-event"))
       .standard("Tiny publish-subscriber library")
       .libs(pico_atomic, pico_disposal, pico_fp)
@@ -33,5 +37,5 @@ object Build extends sbt.Build {
 
   lazy val all = Project(id = "pico-event-project", base = file("."))
       .notPublished
-      .aggregate(`pico-event`)
+      .aggregate(`pico-event`, `pico-fake`)
 }

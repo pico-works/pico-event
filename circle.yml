@@ -5,6 +5,7 @@ machine:
 dependencies:
   cache_directories:
     - ~/.sbt
+    - ~/.coursier
 
   pre:
     - scripts/check-env-variables.sh
@@ -19,10 +20,13 @@ dependencies:
 
 test:
   override:
-    - sbt +test:test
+    - sbt +test
 
   post:
-    - find . -path "*/test-reports/*" -exec mv {} ${CIRCLE_TEST_REPORTS} \;
+    - sbt coverage clean test coverageReport coverageAggregate
+    - mkdir -p target/scala-2.11/coverage-report/
+    - sbt codacyCoverage
+    - bash <(curl -s https://codecov.io/bash)
 
 deployment:
   release:
