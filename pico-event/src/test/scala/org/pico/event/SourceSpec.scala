@@ -2,6 +2,7 @@ package org.pico.event
 
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
+import org.pico.event.syntax.source._
 import org.specs2.mutable.Specification
 
 class SourceSpec extends Specification {
@@ -34,6 +35,18 @@ class SourceSpec extends Specification {
       bus2.publish("Hello")
 
       result.value must_=== List(Right("Hello"), Left(1))
+    }
+
+    "have count operation" in {
+      val bus = Bus[Int]
+      val count = bus.eventCount
+      System.gc()
+
+      count.value must_=== 0
+      bus.publish(1)
+      count.value must_=== 1
+      bus.publish(1)
+      count.value must_=== 2
     }
   }
 }

@@ -24,12 +24,12 @@ trait Sink[-A] extends Disposer { self =>
 }
 
 object Sink {
-  /** A sink that ignores values published to it.
+  /** Create a sink that calls the side-effecting function for every event emitted.
+    *
+    * @param f The side-effecting function
+    * @tparam A The type of the event
+    * @return A sink that invokes the side-effecting function for every event emitted.
     */
-  val ignore = new Sink[Any] {
-    override def publish(event: Any): Unit = ()
-  }
-
   def apply[A](f: A => Unit): Sink[A] = {
     new Sink[A] {
       val active = new AtomicBoolean(true)

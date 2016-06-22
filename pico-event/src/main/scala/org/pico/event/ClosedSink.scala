@@ -4,4 +4,6 @@ package org.pico.event
   */
 object ClosedSink extends Sink[Any] {
   override def publish(event: Any): Unit = ()
+
+  override def comap[B](f: B => Any): Sink[B] = this
 }

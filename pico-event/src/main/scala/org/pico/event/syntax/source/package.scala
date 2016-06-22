@@ -12,6 +12,12 @@ package object source {
       * @return The live value that will change to contain the latest value emitted by the source
       */
     def latest(initial: A): Live[A] = self.foldRight(initial)((v, _) => v)
+
+    /** Create a live value that counts the number of events that have been emitted.
+      *
+      * @return The live value that will change to contain the latest value emitted by the source
+      */
+    def eventCount: Live[Long] = self.foldRight(0L)((_, v) => v + 1)
   }
 
   implicit class SourceOps_KhVNHpu[A, B](val self: Source[Either[A, B]]) extends AnyVal {
