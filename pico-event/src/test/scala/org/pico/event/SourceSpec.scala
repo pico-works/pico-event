@@ -22,6 +22,18 @@ class SourceSpec extends Specification {
       result.value must_=== List(2)
     }
 
+    "have map operation" in {
+      val bus = Bus[Int]
+      val source = bus.map(_ * 10)
+      val result = source.foldRight(List.empty[Int])(_ :: _)
+      System.gc()
+
+      bus.publish(1)
+      result.value must_=== List(10)
+      bus.publish(2)
+      result.value must_=== List(20, 10)
+    }
+
     "have or operation" in {
       val bus1 = Bus[Int]
       val bus2 = Bus[String]

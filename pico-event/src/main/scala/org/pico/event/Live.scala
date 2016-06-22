@@ -43,7 +43,7 @@ object Live {
     */
   def apply[A](constant: A): Live[A] = new Live[A] {
     override def value: A = constant
-    override def source: Source[A] = ClosedSinkSource
+    override def source: Source[A] = ClosedSource
   }
 
   /** Fold the event source into a value given the value's initial state.

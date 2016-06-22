@@ -88,11 +88,3 @@ trait Source[+A] extends Disposer { self =>
     temp
   }
 }
-
-object Source {
-  /** A source that never emits any events.
-    */
-  val empty = new Source[Nothing] {
-    override def subscribe(subscriber: Nothing => Unit): Closeable = Closed
-  }
-}

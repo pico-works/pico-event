@@ -1,7 +1,11 @@
 package org.pico.event
 
-import org.specs2.mutable.Specification
+import org.pico.disposal.Disposer
+import org.pico.disposal.std.autoCloseable._
+import org.pico.disposal.syntax.disposable._
+import org.pico.event.syntax.disposer._
 import org.pico.fp.syntax._
+import org.specs2.mutable.Specification
 
 class VarSpec extends Specification {
   "Var" should {
@@ -137,6 +141,48 @@ class VarSpec extends Specification {
       result.value must_=== 5
       var1.value = 5
       result.value must_=== 8
+    }
+
+    "be able to be reset by Disposer" in {
+      val disposer = Disposer()
+      val v1 = disposer.resets(0, Var(1))
+
+      v1.value must_=== 1
+      v1.value = 2
+      v1.value must_=== 2
+      disposer.dispose()
+      v1.value must_=== 0
+    }
+
+    "be able to be able to getAndSet" in {
+      val v1 = Var(1)
+      val v2 = v1.source.foldRight(List.empty[Int])(_ :: _)
+
+      v1.getAndSet(2) must_=== 1
+      v1.value must_=== 2
+      v2.value must_=== List(2)
+    }
+
+    "be able to be able to compareAndSet" in {
+      val v1 = Var(1)
+      val v2 = v1.source.foldRight(List.empty[Int])(_ :: _)
+
+      v1.compareAndSet(1, 2) must_=== true
+      v1.value must_=== 2
+      v2.value must_=== List(2)
+
+      v1.compareAndSet(1, 3) must_=== false
+      v1.value must_=== 2
+      v2.value must_=== List(2)
+    }
+
+    "be able to be able to update" in {
+      val v1 = Var(1)
+      val v2 = v1.source.foldRight(List.empty[Int])(_ :: _)
+
+      v1.update(_ + 9) must_=== 1
+      v1.value must_=== 10
+      v2.value must_=== List(10)
     }
   }
 }
