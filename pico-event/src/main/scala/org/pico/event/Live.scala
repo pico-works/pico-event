@@ -77,10 +77,10 @@ object Live {
     override def point[A](a: => A): Live[A] = Live(a)
 
     override def ap[A, B](fa: => Live[A])(ff: => Live[A => B]): Live[B] = {
-      (ff.source or fa.source).foldRight(ff.value -> fa.value) { (either, both) =>
+      (ff.source or fa.source).foldRight(ff.value -> fa.value) { case (either, (ffv, fav)) =>
         either match {
-          case Left(f)  => f -> both._2
-          case Right(a) => both._1 -> a
+          case Left(f)  => f -> fav
+          case Right(a) => ffv -> a
         }
       }.map { case (f, a) => f(a) }
     }
