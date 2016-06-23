@@ -6,6 +6,12 @@ import org.specs2.mutable.Specification
 
 class LiveSpec extends Specification {
   "Live" should {
+    "have apply method that creates constant" in {
+      val live = Live(1)
+      live.value must_=== 1
+      live.source must_=== ClosedSource
+    }
+
     "have map operation" in {
       val bus = Bus[Int]
       val live1 = bus.latest(1)

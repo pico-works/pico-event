@@ -1,11 +1,8 @@
 package org.pico.event
 
-import java.io.Closeable
-
-import org.pico.disposal.{Closed, Disposer}
-import org.specs2.mutable.Specification
+import org.pico.disposal.Closed
 import org.pico.event.syntax.source._
-import org.pico.disposal.std.autoCloseable._
+import org.specs2.mutable.Specification
 
 class ClosedSourceSpec extends Specification {
   "ClosedSource" should {
