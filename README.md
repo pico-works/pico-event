@@ -79,6 +79,40 @@ events will be emitted.
 
 To dispose a `Sink` means that all calls to `publish` will be ignored.
 
+The same applies to any type in this library that implements `Closeable`.  If they own
+subscriptions, then closing those objects will also close those subscriptions.  If they maintain
+references to resources, then closing those objects will also release those references to
+facilitate garbage collection.
+
+## Map function for Source
+
+The map function can be used to create one `Source` out of another by supplying a mapping function.
+Events emitted by the original `Source` will have the mapping function applied to it with the
+result emitted by the new `Source`
+
+    val stringSource: Source[String]
+    val stringLengthSource: Source[Int] = stringSource.map(_.length)
+
+## Effect function for Source
+
+The effect function is similar to map.  It behaves much like `source.map(identity)`, i.e. it will
+will produce a new source that emits the same events as the original - except that it will also
+execute a side-effecting function before doing so.
+
+    val stringSource: Source[String]
+    val printingStringSource: Source[String] = stringSource.effect(println)
+
+## Comap function for Sink
+
+In a similar fashion, `Sink` has a `comap` function that returns a new `Sink` that transforms events
+that are published before with a mapping function.  Unlike `map`, which takes the mapping function
+`A => B`, the `comap` function takes a mapping function `B => A`.  Because `B` is now an argument
+type instead of a return type, a type-hint for the argument type must be provided with the `comap`
+method as shown below:
+
+    val stringSink: Sink[Int]
+    val stringLengthSink: Sink[String] = stringSink.comap[Int](_.length)
+
 ## Observable Variables
 Observable variables have the type `Var[A]`.  They can be created by calling the
 companion object constructor method with an initial value like this:
@@ -100,5 +134,3 @@ Moreover, it exposes an event source that emits the new value after every value
 change:
 
     val source: Event[Long] = counter.source
-
-

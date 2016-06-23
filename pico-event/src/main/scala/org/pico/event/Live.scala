@@ -3,16 +3,16 @@ package org.pico.event
 import java.util.concurrent.atomic.AtomicReference
 
 import org.pico.atomic.syntax.std.atomicReference._
-import org.pico.disposal.{Closed, Disposer}
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
+import org.pico.disposal.{Closed, SimpleDisposer}
 import org.pico.event.syntax.source._
 import org.pico.fp._
 
 /** A value that may change over time.  There is also an event source that emits the new value every
   * time the value changes.
   */
-trait Live[A] extends Disposer {
+trait Live[A] extends SimpleDisposer {
   /** Get the current value.
     */
   def value: A

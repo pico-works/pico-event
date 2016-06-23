@@ -2,9 +2,9 @@ import sbt.Keys._
 import sbt._
 
 object Build extends sbt.Build {  
-  val pico_atomic               = "org.pico"        %%  "pico-atomic"               % "0.2.0-5"
-  val pico_disposal             = "org.pico"        %%  "pico-disposal"             % "0.5.0-10"
-  val pico_fp                   = "org.pico"        %%  "pico-fp"                   % "0.0.1-4"
+  val pico_atomic               = "org.pico"        %%  "pico-atomic"               % "0.2.0-9"
+  val pico_disposal             = "org.pico"        %%  "pico-disposal"             % "0.6.0-17"
+  val pico_fp                   = "org.pico"        %%  "pico-fp"                   % "0.0.1-5"
 
   val specs2_core               = "org.specs2"      %%  "specs2-core"               % "3.7.2"
 
@@ -39,3 +39,4 @@ object Build extends sbt.Build {
       .notPublished
       .aggregate(`pico-event`, `pico-fake`)
 }
+

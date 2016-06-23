@@ -20,5 +20,19 @@ class SinkSpec extends Specification {
       sink.publish(4)
       result.value must_=== List(2)
     }
+
+    "have comap operation" in {
+      val bus = Bus[Int]
+      val result = bus.foldRight(List.empty[Int])(_ :: _)
+      val sink = bus.comap[String](_.length)
+      result.value must_=== List.empty
+      sink.publish("1")
+      sink.publish("2")
+      sink.publish("3")
+      result.value must_=== List(1, 1, 1)
+      sink.dispose()
+      sink.publish("4")
+      result.value must_=== List(1, 1, 1)
+    }
   }
 }

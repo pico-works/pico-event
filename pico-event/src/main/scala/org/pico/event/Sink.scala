@@ -2,10 +2,10 @@ package org.pico.event
 
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 
-import org.pico.disposal.Disposer
+import org.pico.disposal.SimpleDisposer
 import org.pico.disposal.std.autoCloseable._
 
-trait Sink[-A] extends Disposer { self =>
+trait Sink[-A] extends SimpleDisposer { self =>
   /** Get the Sink representation of this.
     */
   def asSink: Sink[A] = this
