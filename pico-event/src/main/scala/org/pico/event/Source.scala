@@ -2,11 +2,11 @@ package org.pico.event
 
 import java.io.Closeable
 
+import org.pico.disposal.SimpleDisposer
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
-import org.pico.disposal.{Closed, Disposer}
 
-trait Source[+A] extends Disposer { self =>
+trait Source[+A] extends SimpleDisposer { self =>
   /** Get the Source representation of this.
     */
   def asSource: Source[A] = this

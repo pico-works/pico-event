@@ -1,5 +1,6 @@
 package org.pico.event
 
+import org.pico.disposal.Disposer
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
 import org.pico.event.syntax.source._
@@ -59,6 +60,33 @@ class SourceSpec extends Specification {
       count.value must_=== 1
       bus.publish(1)
       count.value must_=== 2
+    }
+
+    "have effect operation" in {
+      val bus = Bus[Int]
+      val disposer = Disposer()
+      var count = 0
+      disposer += bus.effect(e => count += e)
+      System.gc()
+
+      count must_=== 0
+      bus.publish(1)
+      count must_=== 1
+      bus.publish(2)
+      count must_=== 3
+    }
+
+    "allow consecutive map operations" in {
+      val bus = Bus[Int]
+      val source = bus.map(_ * 100).map(_ + 10)
+      val v = source.latest(0)
+      System.gc()
+
+      v.value must_=== 0
+      bus.publish(1)
+      v.value must_=== 110
+      bus.publish(2)
+      v.value must_=== 210
     }
   }
 }

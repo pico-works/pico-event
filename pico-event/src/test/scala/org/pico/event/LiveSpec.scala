@@ -166,5 +166,18 @@ class LiveSpec extends Specification {
       bus1.publish(5)
       result.value must_=== 8
     }
+
+    "have asLive method" in {
+      val v = Live(1)
+      v.value must_== v.asLive.value
+    }
+
+    "have closed source if initialised as constant" in {
+      Live(1).source must_=== ClosedSource
+    }
+
+    "have point syntax" in {
+      1.point[Live].value must_=== 1
+    }
   }
 }
