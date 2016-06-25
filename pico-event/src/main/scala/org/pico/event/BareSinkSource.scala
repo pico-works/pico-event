@@ -16,20 +16,21 @@ import org.pico.disposal.OnClose
   * @tparam B The source event type
   */
 private trait BareSinkSource[A, B] extends SinkSource[A, B] {
-  private final val subscribers = new AtomicReference(List.empty[WeakReference[B => Unit]])
+  private final val subscribers = new AtomicReference(List.empty[WeakReference[Wrapper[B => Unit]]])
   private final val garbage = new AtomicInteger(0)
 
   def transform: A => B
 
   override def subscribe(subscriber: (B) => Unit): Closeable = {
-    val subscriberRef = new WeakReference(subscriber)
+    val wrapper = Wrapper(subscriber)
+    val subscriberRef = new WeakReference(wrapper)
 
     subscribers.update(subscriberRef :: _)
 
     houseKeep()
 
     OnClose {
-      identity(subscriber)
+      identity(wrapper)
       subscriberRef.clear()
       houseKeep()
     }
@@ -39,9 +40,14 @@ private trait BareSinkSource[A, B] extends SinkSource[A, B] {
     val v = transform(event)
 
     subscribers.get().foreach { subscriberRef =>
-      val subscriber = subscriberRef.get()
+      var wrapper = subscriberRef.get()
 
-      if (subscriber != null) {
+      if (wrapper != null) {
+        val subscriber = wrapper.target
+        // Drop reference to wrapper so that the garbage collector can collect it if there are no
+        // other references to it.  This helps facilitate earlier collection, especially if a lot
+        // of time is spent in the subscriber.  This is why wrapper is a var.
+        wrapper = null
         subscriber(v)
       } else {
         garbage.incrementAndGet()
