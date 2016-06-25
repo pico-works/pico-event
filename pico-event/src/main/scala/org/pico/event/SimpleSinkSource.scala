@@ -3,9 +3,10 @@ package org.pico.event
 import java.io.Closeable
 import java.util.concurrent.atomic.AtomicReference
 
+import org.pico.disposal.SimpleDisposer
 import org.pico.disposal.std.autoCloseable._
 
-trait SimpleSinkSource[A, B] extends SinkSource[A, B] {
+trait SimpleSinkSource[A, B] extends SinkSource[A, B] with SimpleDisposer {
   val impl = this.swapDisposes(ClosedSinkSource, new AtomicReference(BareSinkSource[A, B](transform)))
 
   impl.get().disposes(this)

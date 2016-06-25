@@ -1,23 +1,23 @@
 package org.pico.event.syntax
 
 import org.pico.disposal.std.autoCloseable._
-import org.pico.event.{Live, SimpleBus, Sink, Source}
+import org.pico.event._
 
 package object source {
   implicit class SourceOps_hJob2ex[A](val self: Source[A]) extends AnyVal {
-    /** Create a live value with an initial value, which will have the latest value that was
+    /** Create a view with an initial value, which will have the latest value that was
       * emitted by the event source.
       *
       * @param initial The initial value
-      * @return The live value that will change to contain the latest value emitted by the source
+      * @return The view that will change to contain the latest value emitted by the source
       */
-    def latest(initial: A): Live[A] = self.foldRight(initial)((v, _) => v)
+    def latest(initial: A): View[A] = self.foldRight(initial)((v, _) => v)
 
-    /** Create a live value that counts the number of events that have been emitted.
+    /** Create a view that counts the number of events that have been emitted.
       *
-      * @return The live value that will change to contain the latest value emitted by the source
+      * @return The view that will change to contain the latest value emitted by the source
       */
-    def eventCount: Live[Long] = self.foldRight(0L)((_, v) => v + 1)
+    def eventCount: View[Long] = self.foldRight(0L)((_, v) => v + 1)
   }
 
   implicit class SourceOps_KhVNHpu[A, B](val self: Source[Either[A, B]]) extends AnyVal {

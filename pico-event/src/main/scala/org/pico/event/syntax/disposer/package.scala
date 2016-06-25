@@ -1,7 +1,7 @@
 package org.pico.event.syntax
 
 import org.pico.disposal.Disposer
-import org.pico.event.Var
+import org.pico.event.{Cell, Cell$}
 
 package object disposer {
   implicit class DisposerOps_dEhxmsY(val self: Disposer) extends AnyVal {
@@ -14,7 +14,7 @@ package object disposer {
       * @return The disposable object
       */
     @inline
-    final def resets[V](replacement: V, variable: Var[V]): Var[V] = {
+    final def resets[V](replacement: V, variable: Cell[V]): Cell[V] = {
       self.onClose(variable.value = replacement)
       variable
     }

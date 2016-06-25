@@ -12,7 +12,7 @@ import org.pico.fp._
 /** A value that may change over time.  There is also an event source that emits the new value every
   * time the value changes.
   */
-trait Live[A] extends SimpleDisposer {
+trait View[A] extends SimpleDisposer {
   /** Get the current value.
     */
   def value: A
@@ -21,27 +21,28 @@ trait Live[A] extends SimpleDisposer {
     */
   def source: Source[A]
 
-  /** Get this as a Live object.
+  /** Get this as a View object.
     */
-  def asLive: Live[A] = this
+  def asView: View[A] = this
 
   /** Map the value.
     *
     * @param f The mapping function
     * @tparam B The return type of the mapping function
-    * @return New live object containing the mapped value
+    * @return New view containing the mapped value
     */
-  def map[B](f: A => B): Live[B] = source.foldRight(f(value))((a, _) => f(a))
+  def map[B](f: A => B): View[B] = source.foldRight(f(value))((a, _) => f(a))
 }
 
-object Live {
-  /** Create a live object that never changes.
+object View {
+  /** Create a view that never changes.
     *
     * @param constant The value to initialise with
     * @tparam A The type of the value to initialise with
-    * @return New live object with the initialised constant value
+    * @return New view with the initialised constant value
     */
-  def apply[A](constant: A): Live[A] = new Live[A] {
+  @inline
+  final def apply[A](constant: A): View[A] = new View[A] {
     override def value: A = constant
     override def source: Source[A] = ClosedSource
   }
@@ -53,11 +54,12 @@ object Live {
     * @tparam B Type of the new value
     * @return The value.
     */
-  def foldRight[A, B](self: Source[A])(initial: B)(f: (A, => B) => B): Live[B] = {
+  @inline
+  final def foldRight[A, B](self: Source[A])(initial: B)(f: (A, => B) => B): View[B] = {
     val state = new AtomicReference[B](initial)
 
-    new Live[B] { temp =>
-      override def value: B = state.get
+    new View[B] { temp =>
+      override def value: B = state.value
 
       override val source = Bus[B]
 
@@ -73,10 +75,10 @@ object Live {
     }
   }
 
-  implicit val monad_Live_D8tgCFF = new Monad[Live] {
-    override def point[A](a: => A): Live[A] = Live(a)
+  implicit val monad_View_D8tgCFF = new Monad[View] {
+    override def point[A](a: => A): View[A] = View(a)
 
-    override def ap[A, B](fa: => Live[A])(ff: => Live[A => B]): Live[B] = {
+    override def ap[A, B](fa: => View[A])(ff: => View[A => B]): View[B] = {
       (ff.source or fa.source).foldRight(ff.value -> fa.value) { case (either, (ffv, fav)) =>
         either match {
           case Left(f)  => f -> fav
@@ -85,24 +87,24 @@ object Live {
       }.map { case (f, a) => f(a) }
     }
 
-    override def map[A, B](fa: Live[A])(f: A => B): Live[B] = fa.map(f)
+    override def map[A, B](fa: View[A])(f: A => B): View[B] = fa.map(f)
 
-    override def bind[A, B](fa: Live[A])(f: A => Live[B]): Live[B] = {
+    override def bind[A, B](fa: View[A])(f: A => View[B]): View[B] = {
       val busB = Bus[B]
-      val live = busB.latest(f(fa.value).value)
-      val subscriptionRef = live.swapDisposes(Closed, new AtomicReference(f(fa.value).source.into(busB)))
+      val view = busB.latest(f(fa.value).value)
+      val subscriptionRef = view.swapDisposes(Closed, new AtomicReference(f(fa.value).source.into(busB)))
       val lock = new Object
 
-      live += fa.source.subscribe { a =>
+      view += fa.source.subscribe { a =>
         lock.synchronized {
           subscriptionRef.swap(Closed).dispose()
-          val liveB = f(a)
-          busB.publish(liveB.value)
-          subscriptionRef.swap(liveB.source.into(busB))
+          val viewB = f(a)
+          busB.publish(viewB.value)
+          subscriptionRef.swap(viewB.source.into(busB))
         }
       }
 
-      live
+      view
     }
   }
 }
