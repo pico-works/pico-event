@@ -1,6 +1,7 @@
 package org.pico.event
 
-import org.pico.disposal.Closed
+import org.pico.disposal.std.autoCloseable._
+import org.pico.disposal.{Closed, Disposer}
 import org.pico.event.syntax.source._
 import org.specs2.mutable.Specification
 
@@ -25,22 +26,22 @@ class ClosedSourceSpec extends Specification {
     "implement merge that returns source that emits same events as `that`" in {
       val bus = Bus[Int]
       val source = ClosedSource.merge(bus)
-      val live = source.latest(0)
+      val view = source.latest(0)
 
       bus.publish(1)
-      live.value must_=== 1
+      view.value must_=== 1
     }
 
     "implement foldRight that returns source that emits same events as `that`" in {
-      val live = ClosedSource.foldRight(1)((_, b) => b)
-      live.value must_=== 1
+      val view = ClosedSource.foldRight(1)((_, b) => b)
+      view.value must_=== 1
     }
 
-    "implement foldRight that returns Live object that never changes" in {
+    "implement foldRight that returns a view that never changes" in {
       val bus = Bus[Int]
-      val live = bus.latest(0)
+      val view = bus.latest(0)
       ClosedSource.into(bus)
-      live.value must_=== 0
+      view.value must_=== 0
     }
 
     "implement filter that returns ClosedSource" in {
@@ -51,12 +52,13 @@ class ClosedSourceSpec extends Specification {
       val bus = Bus[Int]
       val source = ClosedSource or bus
       val leftBus = Bus[Any]
-      val rightLive = source.divertLeft(leftBus).latest(0)
+      val rightView = source.divertLeft(leftBus).latest(0)
       val count = leftBus.eventCount
-      val xxx = leftBus.subscribe(_ => println("Hello"))
+      val disposer = Disposer()
+      disposer += leftBus.subscribe(_ => println("Hello"))
       bus.publish(1)
       bus.publish(10)
-      rightLive.value must_=== 10
+      rightView.value must_=== 10
       count.value must_=== 0
     }
   }

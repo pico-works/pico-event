@@ -10,7 +10,7 @@ import org.pico.atomic.syntax.std.atomicReference._
   *
   * @tparam A The type of the value the mutable variable stores
   */
-trait Var[A] extends Live[A] {
+trait Cell[A] extends View[A] {
   /** Assign a new value to the variable
     *
     * The new value will be emitted.
@@ -52,7 +52,7 @@ trait Var[A] extends Live[A] {
   def update(f: A => A): A
 }
 
-object Var {
+object Cell {
   /** Create an atomic mutable variable with an initial value that can act as an event source that
     * emits each newly assigned value.
     *
@@ -60,15 +60,15 @@ object Var {
     * @tparam A The type of the initial value
     * @return The atomic mutable variable
     */
-  def apply[A](initial: A): Var[A] = {
+  def apply[A](initial: A): Cell[A] = {
     val state = new AtomicReference[A](initial)
 
-    new Var[A] { temp =>
+    new Cell[A] { temp =>
       val bus = Bus[A]
 
       override val source = bus
 
-      override def value: A = state.get
+      override def value: A = state.value
 
       override def value_=(replacement: A): A = {
         state.set(replacement)

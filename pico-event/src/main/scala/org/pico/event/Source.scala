@@ -2,11 +2,11 @@ package org.pico.event
 
 import java.io.Closeable
 
-import org.pico.disposal.SimpleDisposer
+import org.pico.disposal.Disposer
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
 
-trait Source[+A] extends SimpleDisposer { self =>
+trait Source[+A] extends Disposer { self =>
   /** Get the Source representation of this.
     */
   def asSource: Source[A] = this
@@ -59,7 +59,7 @@ trait Source[+A] extends SimpleDisposer { self =>
     * @tparam B Type of the new value
     * @return The value.
     */
-  def foldRight[B](initial: B)(f: (A, => B) => B): Live[B] = Live.foldRight(self)(initial)(f)
+  def foldRight[B](initial: B)(f: (A, => B) => B): View[B] = View.foldRight(self)(initial)(f)
 
   /** Direct all events into the sink.
     */

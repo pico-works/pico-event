@@ -2,13 +2,10 @@ package org.pico.event
 
 import java.io.Closeable
 
-import org.pico.disposal.Closed
+import org.pico.disposal.{Closed, ClosedDisposer}
 import org.pico.disposal.std.autoCloseable._
 
-/** An already closed source that will never emit events or hold references to any subscribers it
-  * is given.
-  */
-object ClosedSource extends Source[Nothing] {
+trait ClosedSource extends Source[Nothing] with ClosedDisposer {
   override def subscribe(subscriber: Nothing => Unit): Closeable = Closed
 
   override def map[B](f: Nothing => B): Source[B] = ClosedSource
@@ -19,7 +16,7 @@ object ClosedSource extends Source[Nothing] {
 
   override def merge[B](that: Source[B]): Source[B] = that
 
-  override def foldRight[B](initial: B)(f: (Nothing, => B) => B): Live[B] = Live(initial)
+  override def foldRight[B](initial: B)(f: (Nothing, => B) => B): View[B] = View(initial)
 
   override def into(sink: Sink[Nothing]): Closeable = Closed
 
@@ -31,3 +28,8 @@ object ClosedSource extends Source[Nothing] {
     temp
   }
 }
+
+/** An already closed source that will never emit events or hold references to any subscribers it
+  * is given.
+  */
+object ClosedSource extends ClosedSource
