@@ -12,7 +12,7 @@ Add this to your SBT project:
 ```
 resolvers += "dl-john-ky-releases" at "http://dl.john-ky.io/maven/releases"
 
-libraryDependencies += "org.pico" %%  "pico-event" % "0.1.0-20"
+libraryDependencies += "org.pico" %%  "pico-event" % "0.2.0"
 ```
 
 ## Publish-subscribe pattern
