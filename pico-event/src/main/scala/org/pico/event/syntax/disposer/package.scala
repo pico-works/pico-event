@@ -1,7 +1,7 @@
 package org.pico.event.syntax
 
 import org.pico.disposal.Disposer
-import org.pico.event.{Cell, Cell$}
+import org.pico.event.Cell
 
 package object disposer {
   implicit class DisposerOps_dEhxmsY(val self: Disposer) extends AnyVal {
