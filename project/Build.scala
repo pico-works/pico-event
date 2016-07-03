@@ -3,8 +3,8 @@ import sbt._
 
 object Build extends sbt.Build {  
   val pico_atomic               = "org.pico"        %%  "pico-atomic"               % "0.2.0"
-  val pico_disposal             = "org.pico"        %%  "pico-disposal"             % "0.6.0"
-  val pico_fp                   = "org.pico"        %%  "pico-fp"                   % "0.0.1"
+  val pico_disposal             = "org.pico"        %%  "pico-disposal"             % "0.6.2"
+  val pico_fp                   = "org.pico"        %%  "pico-fp"                   % "1.1.0"
 
   val specs2_core               = "org.specs2"      %%  "specs2-core"               % "3.7.2"
 
