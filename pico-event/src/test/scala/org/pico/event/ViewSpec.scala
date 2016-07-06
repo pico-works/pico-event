@@ -1,7 +1,7 @@
 package org.pico.event
 
 import org.pico.event.syntax.source._
-import org.pico.fp.syntax._
+import org.pico.fp.syntax.monad._
 import org.specs2.mutable.Specification
 
 class ViewSpec extends Specification {

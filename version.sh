@@ -62,7 +62,7 @@ else
             exit 1
         fi
 
-        git tag -a "v${_sem_ver}" -m "New version ${_sem_ver}" && git push origin "v${_sem_ver}" || {
+        git tag -a "v${_sem_ver}" -m "New version ${_sem_ver}" && git push up "v${_sem_ver}" || {
             echo "Tagging failed.  To force, type:"
             echo ""
             echo "    git tag -a \"v${_sem_ver}\" -m \"New version ${_sem_ver}\" -f"

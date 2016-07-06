@@ -4,7 +4,7 @@ import org.pico.disposal.Disposer
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
 import org.pico.event.syntax.disposer._
-import org.pico.fp.syntax._
+import org.pico.fp.syntax.monad._
 import org.specs2.mutable.Specification
 
 class VarSpec extends Specification {
