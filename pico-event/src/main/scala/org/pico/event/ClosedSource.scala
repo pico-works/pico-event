@@ -12,7 +12,7 @@ trait ClosedSource extends Source[Nothing] with ClosedDisposer {
 
   override def effect(f: Nothing => Unit): Source[Nothing] = ClosedSource
 
-  override def mapConcat[B](f: Nothing => Iterable[B]): Source[B] = ClosedSource
+  override def mapConcat[F[_]: HasForeach, B](f: Nothing => F[B]): Source[B] = ClosedSource
 
   override def merge[B](that: Source[B]): Source[B] = that
 

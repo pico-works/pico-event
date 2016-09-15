@@ -5,6 +5,9 @@ import java.io.Closeable
 import org.pico.disposal.Disposer
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
+import org.pico.event.syntax.hasForeach._
+
+import scala.language.higherKinds
 
 trait Source[+A] extends Disposer { self =>
   /** Get the Source representation of this.
@@ -37,7 +40,7 @@ trait Source[+A] extends Disposer { self =>
   /** From a function that maps each event into an iterable event, create a new Source that will
     * emit each element of the iterable event.
     */
-  def mapConcat[B](f: A => Iterable[B]): Source[B] = {
+  def mapConcat[F[_]: HasForeach, B](f: A => F[B]): Source[B] = {
     new SimpleBus[B] { temp =>
       temp += self.subscribe(f(_).foreach(temp.publish))
     }

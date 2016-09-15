@@ -1,7 +1,3 @@
-machine:
-  environment:
-    COURSIER_PROGRESS: 0
-
 dependencies:
   cache_directories:
     - ~/.sbt
@@ -12,7 +8,7 @@ dependencies:
     - git fetch --unshallow || true
 
   override:
-    - sbt +test:compile +package
+    - sbt -batch +test:compile +package
 
   post:
     - find ~/.sbt -name "*.lock" | xargs rm
