@@ -18,11 +18,11 @@ test:
   override:
     - sbt +test
 
-  post:
-    - sbt coverage clean test coverageReport coverageAggregate
-    - mkdir -p target/scala-2.11/coverage-report/
-    - sbt codacyCoverage
-    - bash <(curl -s https://codecov.io/bash)
+  # post:
+  #   - sbt coverage clean test coverageReport coverageAggregate
+  #   - mkdir -p target/scala-2.11/coverage-report/
+  #   - sbt codacyCoverage
+  #   - bash <(curl -s https://codecov.io/bash)
 
 deployment:
   release:
