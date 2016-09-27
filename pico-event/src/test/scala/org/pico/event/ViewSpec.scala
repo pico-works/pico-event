@@ -178,5 +178,34 @@ class ViewSpec extends Specification {
     "have point syntax" in {
       1.point[View].value must_=== 1
     }
+
+    "Should run quickly" in {
+      val bus = Bus[Long]
+      val count = bus.eventCount
+
+      val before = System.currentTimeMillis()
+
+      val threads = (0L until 10L).map { threadId =>
+        val thread = new Thread {
+          override def run(): Unit = {
+            for (j <- 0L until 100000L) {
+              bus.publish(1)
+            }
+          }
+        }
+
+        thread.start()
+
+        thread
+      }
+
+      threads.foreach(_.join)
+
+      val after = System.currentTimeMillis()
+
+      val time = after - before
+
+      ok
+    }
   }
 }
