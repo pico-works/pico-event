@@ -2,12 +2,12 @@ package org.pico.event
 
 import java.util.concurrent.atomic.AtomicReference
 
+import cats.Monad
 import org.pico.atomic.syntax.std.atomicReference._
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
 import org.pico.disposal.{Closed, SimpleDisposer}
 import org.pico.event.syntax.source._
-import org.pico.fp._
 
 /** A value that may change over time.  There is also an event source that emits the new value every
   * time the value changes.
@@ -76,9 +76,9 @@ object View {
   }
 
   implicit val monad_View_D8tgCFF = new Monad[View] {
-    override def point[A](a: => A): View[A] = View(a)
+    override def pure[A](a: A): View[A] = View(a)
 
-    override def ap[A, B](fa: => View[A])(ff: => View[A => B]): View[B] = {
+    override def ap[A, B](ff: View[A => B])(fa: View[A]): View[B] = {
       (ff.source or fa.source).foldRight(ff.value -> fa.value) { case (either, (ffv, fav)) =>
         either match {
           case Left(f)  => f -> fav
@@ -89,7 +89,7 @@ object View {
 
     override def map[A, B](fa: View[A])(f: A => B): View[B] = fa.map(f)
 
-    override def bind[A, B](fa: View[A])(f: A => View[B]): View[B] = {
+    override def flatMap[A, B](fa: View[A])(f: A => View[B]): View[B] = {
       val busB = Bus[B]
       val view = busB.latest(f(fa.value).value)
       val subscriptionRef = view.swapDisposes(Closed, new AtomicReference(f(fa.value).source.into(busB)))
@@ -106,5 +106,7 @@ object View {
 
       view
     }
+
+    override def tailRecM[A, B](a: A)(f: A => View[Either[A, B]]): View[B] = defaultTailRecM(a)(f)
   }
 }
