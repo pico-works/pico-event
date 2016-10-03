@@ -1,10 +1,12 @@
 package org.pico.event
 
+import cats.syntax.apply._
+import cats.syntax.cartesian._
+import cats.syntax.flatMap._
 import org.pico.disposal.Disposer
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
 import org.pico.event.syntax.disposer._
-import org.pico.fp.syntax.monad._
 import org.specs2.mutable.Specification
 
 class VarSpec extends Specification {
@@ -113,7 +115,7 @@ class VarSpec extends Specification {
       val cell2 = Cell(0)
       val cell3 = Cell(0)
 
-      val result = (cell1.asView, cell2.asView, cell3.asView).applyIn(_ + _ + _)
+      val result = (cell1.asView |@| cell2.asView |@| cell3.asView).map(_ + _ + _)
       System.gc()
 
       result.value must_=== 0
@@ -131,7 +133,7 @@ class VarSpec extends Specification {
       val cell3 = Cell(0)
       val cell4 = Cell(0)
 
-      val result = (cell1.asView, cell2.asView, cell3.asView, cell4.asView).applyIn(_ + _ + _ + _)
+      val result = (cell1.asView |@| cell2.asView |@| cell3.asView |@| cell4.asView).map(_ + _ + _ + _)
       System.gc()
 
       result.value must_=== 0

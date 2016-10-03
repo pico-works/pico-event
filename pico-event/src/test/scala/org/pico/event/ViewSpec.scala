@@ -1,7 +1,10 @@
 package org.pico.event
 
+import cats.syntax.applicative._
+import cats.syntax.apply._
+import cats.syntax.cartesian._
+import cats.syntax.flatMap._
 import org.pico.event.syntax.source._
-import org.pico.fp.syntax.monad._
 import org.specs2.mutable.Specification
 
 class ViewSpec extends Specification {
@@ -132,7 +135,7 @@ class ViewSpec extends Specification {
       val view2 = bus2.latest(0)
       val view3 = bus3.latest(0)
 
-      val result = (view1, view2, view3).applyIn(_ + _ + _)
+      val result = (view1 |@| view2 |@| view3).map(_ + _ + _)
       System.gc()
 
       result.value must_=== 0
@@ -154,7 +157,7 @@ class ViewSpec extends Specification {
       val view3 = bus3.latest(0)
       val view4 = bus4.latest(0)
 
-      val result = (view1, view2, view3, view4).applyIn(_ + _ + _ + _)
+      val result = (view1 |@| view2 |@| view3 |@| view4).map(_ + _ + _ + _)
       System.gc()
 
       result.value must_=== 0
@@ -176,7 +179,7 @@ class ViewSpec extends Specification {
     }
 
     "have point syntax" in {
-      1.point[View].value must_=== 1
+      1.pure[View].value must_=== 1
     }
 
     "Should run quickly" in {
