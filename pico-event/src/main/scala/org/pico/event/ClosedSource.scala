@@ -18,7 +18,7 @@ trait ClosedSource extends Source[Nothing] with ClosedDisposer {
 
   override def foldRight[B](initial: B)(f: (Nothing, => B) => B): View[B] = View(initial)
 
-  override def into(sink: Sink[Nothing]): Closeable = Closed
+  override def into[B >: Nothing](sink: Sink[B]): Closeable = Closed
 
   override def filter(f: Nothing => Boolean): Source[Nothing] = ClosedSource
 
