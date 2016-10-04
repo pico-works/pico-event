@@ -55,6 +55,14 @@ package object source {
         }
       }
     }
+
+    /** New Source propagating left of Either.
+      */
+    def justLeft: Source[A] = divertRight(ClosedSink)
+
+    /** New Source propagating right of Either.
+      */
+    def justRight: Source[B] = divertLeft(ClosedSink)
   }
 
   implicit class SourceOps_iY4kPqc[A](val self: Source[Future[A]]) extends AnyVal {
