@@ -66,7 +66,7 @@ trait Source[+A] extends Disposer { self =>
 
   /** Direct all events into the sink.
     */
-  def into(sink: Sink[A]): Closeable = self.subscribe(sink.publish)
+  def into[B >: A](sink: Sink[B]): Closeable = self.subscribe(sink.publish)
 
   /** Create a new Source that emits only events that satisfies the predicate f
     *
