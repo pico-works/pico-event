@@ -2,6 +2,9 @@ package org.pico.event.syntax
 
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event._
+import org.pico.event.syntax.future._
+
+import scala.concurrent.{ExecutionContext, Future}
 
 package object source {
   implicit class SourceOps_hJob2ex[A](val self: Source[A]) extends AnyVal {
@@ -51,6 +54,20 @@ package object source {
           case Left(lt) => temp.publish(lt)
         }
       }
+    }
+  }
+
+  implicit class SourceOps_iY4kPqc[A](val self: Source[Future[A]]) extends AnyVal {
+    /** Return a source which emits events whenever the futures from the original
+      * source complete.  Success values will be emitted on the right and failures
+      * will be emitted on the left.
+      */
+    def scheduled(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = {
+      val bus = Bus[Either[Throwable, A]]
+
+      bus.disposes(self.subscribe(_.completeInto(bus)))
+
+      bus
     }
   }
 }
