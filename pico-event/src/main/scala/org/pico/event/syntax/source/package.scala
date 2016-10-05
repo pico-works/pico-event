@@ -3,6 +3,7 @@ package org.pico.event.syntax
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event._
 import org.pico.event.syntax.future._
+import org.pico.event.std.all._
 
 import scala.concurrent.{ExecutionContext, Future}
 
@@ -77,5 +78,25 @@ package object source {
 
       bus
     }
+  }
+
+  implicit class SourceOps_ZWi7qoi[A](val self: Source[Option[A]]) extends AnyVal {
+    /** Propagate Some value as Right and None as the provided Left value.
+      */
+    def right[B](leftValue: => B): Source[Either[B, A]] = self.map {
+      case Some(v) => Right(v)
+      case None => Left(leftValue)
+    }
+
+    /** Propagate Some value as Left and None as the provided Right value.
+      */
+    def left[B](rightValue: => B): Source[Either[A, B]] = self.map {
+      case Some(v) => Left(v)
+      case None => Right(rightValue)
+    }
+
+    /** Propagate Some value.
+      */
+    def justSome: Source[A] = self.mapConcat[Option, A](identity)
   }
 }
