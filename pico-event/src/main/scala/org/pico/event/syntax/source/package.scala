@@ -2,8 +2,8 @@ package org.pico.event.syntax
 
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event._
-import org.pico.event.syntax.future._
 import org.pico.event.std.all._
+import org.pico.event.syntax.future._
 
 import scala.concurrent.{ExecutionContext, Future}
 

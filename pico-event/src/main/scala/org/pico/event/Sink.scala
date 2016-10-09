@@ -2,8 +2,8 @@ package org.pico.event
 
 import java.util.concurrent.atomic.{AtomicBoolean, AtomicReference}
 
-import org.pico.disposal.{Disposer, SimpleDisposer}
 import org.pico.disposal.std.autoCloseable._
+import org.pico.disposal.{Disposer, SimpleDisposer}
 
 trait Sink[-A] extends Disposer { self =>
   /** Get the Sink representation of this.
