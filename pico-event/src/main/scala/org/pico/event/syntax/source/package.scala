@@ -22,6 +22,12 @@ package object source {
       * @return The view that will change to contain the latest value emitted by the source
       */
     def eventCount: View[Long] = self.foldRight(0L)((_, v) => v + 1)
+
+    /** Update a cell with events using a combining function
+      */
+    def update[B](cell: Cell[B])(f: (A, B) => B): AutoCloseable = {
+      self.subscribe(a => cell.update(b => f(a, b)))
+    }
   }
 
   implicit class SourceOps_KhVNHpu[A, B](val self: Source[Either[A, B]]) extends AnyVal {
