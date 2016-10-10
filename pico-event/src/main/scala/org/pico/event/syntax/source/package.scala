@@ -71,7 +71,14 @@ package object source {
       * source complete.  Success values will be emitted on the right and failures
       * will be emitted on the left.
       */
-    def scheduled(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = {
+    @deprecated("Use completed instead")
+    def scheduled(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = completed
+
+    /** Return a source which emits events whenever the futures from the original
+      * source complete.  Success values will be emitted on the right and failures
+      * will be emitted on the left.
+      */
+    def completed(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = {
       val bus = Bus[Either[Throwable, A]]
 
       bus.disposes(self.subscribe(_.completeInto(bus)))
