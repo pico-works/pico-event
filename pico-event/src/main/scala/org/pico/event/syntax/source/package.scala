@@ -22,6 +22,12 @@ package object source {
       * @return The view that will change to contain the latest value emitted by the source
       */
     def eventCount: View[Long] = self.foldRight(0L)((_, v) => v + 1)
+
+    /** Update a cell with events using a combining function
+      */
+    def update[B](cell: Cell[B])(f: (A, B) => B): AutoCloseable = {
+      self.subscribe(a => cell.update(b => f(a, b)))
+    }
   }
 
   implicit class SourceOps_KhVNHpu[A, B](val self: Source[Either[A, B]]) extends AnyVal {
@@ -71,7 +77,14 @@ package object source {
       * source complete.  Success values will be emitted on the right and failures
       * will be emitted on the left.
       */
-    def scheduled(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = {
+    @deprecated("Use completed instead")
+    def scheduled(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = completed
+
+    /** Return a source which emits events whenever the futures from the original
+      * source complete.  Success values will be emitted on the right and failures
+      * will be emitted on the left.
+      */
+    def completed(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = {
       val bus = Bus[Either[Throwable, A]]
 
       bus.disposes(self.subscribe(_.completeInto(bus)))
