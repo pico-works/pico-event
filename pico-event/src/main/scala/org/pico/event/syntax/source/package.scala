@@ -1,5 +1,7 @@
 package org.pico.event.syntax
 
+import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
+
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event._
 import org.pico.event.std.all._
@@ -21,7 +23,30 @@ package object source {
       *
       * @return The view that will change to contain the latest value emitted by the source
       */
-    def eventCount: View[Long] = self.foldRight(0L)((_, v) => v + 1)
+    def eventCount: View[Long] = {
+      val data = new AtomicLong(0L)
+      val emit = new AtomicReference[Long => Unit](_ => ())
+
+      val view = new View[Long] {
+        override def value: Long = data.get()
+
+        override lazy val source: Source[Long] = {
+          val bus = Bus[Long]
+
+          emit.set(bus.publish)
+
+          bus.resets[Long => Unit](_ => (), emit)
+
+          bus
+        }
+      }
+
+      view.disposes(self.subscribe { e =>
+        emit.get()(data.incrementAndGet())
+      })
+
+      view
+    }
 
     /** Update a cell with events using a combining function
       */
