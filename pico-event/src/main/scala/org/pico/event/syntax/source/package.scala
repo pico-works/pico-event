@@ -24,28 +24,18 @@ package object source {
       * @return The view that will change to contain the latest value emitted by the source
       */
     def eventCount: View[Long] = {
-      val data = new AtomicLong(0L)
-      val emit = new AtomicReference[Long => Unit](_ => ())
+      new View[Long] {
+        val data = new AtomicLong(0L)
 
-      val view = new View[Long] {
+        this.disposes(self.subscribe { _ =>
+          data.incrementAndGet()
+          invalidations.invalidate()
+        })
+
         override def value: Long = data.get()
 
-        override lazy val source: Source[Long] = {
-          val bus = Bus[Long]
-
-          emit.set(bus.publish)
-
-          bus.resets[Long => Unit](_ => (), emit)
-
-          bus
-        }
+        override def invalidations: Invalidations = Invalidations()
       }
-
-      view.disposes(self.subscribe { e =>
-        emit.get()(data.incrementAndGet())
-      })
-
-      view
     }
 
     /** Update a cell with events using a combining function
@@ -139,18 +129,22 @@ package object source {
   }
 
   implicit class SourceOps_r8pPKQJ(val self: Source[Long]) extends AnyVal {
-    def sum: View[Long] = self.foldRight(0L)(_ + _)
+    def sum: View[Long] = {
+      val cell = LongCell(0L)
+
+      cell.disposes(self.subscribe(cell.addAndGet(_)))
+
+      cell
+    }
   }
 
   implicit class SourceOps_iAPaWug(val self: Source[Int]) extends AnyVal {
-    def sum: View[Int] = self.foldRight(0)(_ + _)
-  }
+    def sum: View[Int] = {
+      val cell = IntCell(0)
 
-  implicit class SourceOps_Lt4RN8Q(val self: Source[Short]) extends AnyVal {
-    def sum: View[Short] = self.foldRight(0.toShort)((a, b) => (a + b).toShort)
-  }
+      cell.disposes(self.subscribe(cell.addAndGet(_)))
 
-  implicit class SourceOps_G7aVm2q(val self: Source[Byte]) extends AnyVal {
-    def sum: View[Byte] = self.foldRight(0.toByte)((a, b) => (a + b).toByte)
+      cell
+    }
   }
 }

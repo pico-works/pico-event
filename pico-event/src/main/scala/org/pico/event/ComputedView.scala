@@ -2,9 +2,7 @@ package org.pico.event
 
 import java.util.concurrent.atomic.AtomicReference
 
-import org.pico.disposal.SimpleDisposer
-
-trait ComputedVal[A] extends Val[A] with SimpleDisposer {
+trait ComputedView[A] extends View[A] {
   private val ref = new AtomicReference[A](compute())
 
   def compute(): A
