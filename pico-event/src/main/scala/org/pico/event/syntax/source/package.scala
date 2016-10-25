@@ -112,4 +112,20 @@ package object source {
       */
     def justSome: Source[A] = self.mapConcat[Option, A](identity)
   }
+
+  implicit class SourceOps_r8pPKQJ(val self: Source[Long]) extends AnyVal {
+    def sum: View[Long] = self.foldRight(0L)(_ + _)
+  }
+
+  implicit class SourceOps_iAPaWug(val self: Source[Int]) extends AnyVal {
+    def sum: View[Int] = self.foldRight(0)(_ + _)
+  }
+
+  implicit class SourceOps_Lt4RN8Q(val self: Source[Short]) extends AnyVal {
+    def sum: View[Short] = self.foldRight(0.toShort)((a, b) => (a + b).toShort)
+  }
+
+  implicit class SourceOps_G7aVm2q(val self: Source[Byte]) extends AnyVal {
+    def sum: View[Byte] = self.foldRight(0.toByte)((a, b) => (a + b).toByte)
+  }
 }
