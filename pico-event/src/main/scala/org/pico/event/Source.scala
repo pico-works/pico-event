@@ -8,6 +8,7 @@ import org.pico.disposal.syntax.disposable._
 import org.pico.event.syntax.hasForeach._
 
 import scala.language.higherKinds
+import org.pico.atomic.syntax.std.atomicReference._
 
 trait Source[+A] extends Disposer { self =>
   /** Get the Source representation of this.
@@ -62,7 +63,13 @@ trait Source[+A] extends Disposer { self =>
     * @tparam B Type of the new value
     * @return The value.
     */
-  def foldRight[B](initial: B)(f: (A, => B) => B): View[B] = View.foldRight(self)(initial)(f)
+  def foldRight[B](initial: B)(f: (A, => B) => B): View[B] = {
+    val cell = Cell[B](initial)
+
+    cell.disposes(this.subscribe(v => cell.update(a => f(v, a))))
+
+    cell
+  }
 
   /** Direct all events into the sink.
     */

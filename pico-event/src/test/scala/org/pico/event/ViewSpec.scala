@@ -4,6 +4,7 @@ import cats.syntax.applicative._
 import cats.syntax.apply._
 import cats.syntax.cartesian._
 import cats.syntax.flatMap._
+import cats.syntax.functor._
 import org.pico.event.syntax.source._
 import org.specs2.mutable.Specification
 
@@ -12,7 +13,6 @@ class ViewSpec extends Specification {
     "have apply method that creates constant" in {
       val view = View(1)
       view.value must_=== 1
-      view.source must_=== ClosedSource
     }
 
     "have map operation" in {
@@ -33,31 +33,31 @@ class ViewSpec extends Specification {
       view2.value must_=== 30
     }
 
-    "have flatMap operation" in {
-      val bus1 = Bus[Int]
-      val bus2 = Bus[Int]
-      val view1 = bus1.latest(0)
-      val view2 = bus2.latest(0)
-
-      val result = for {
-        a <- view1
-        b <- view2
-      } yield a + b
-
-      System.gc()
-
-      result.value must_=== 0
-      bus1.publish(2)
-      result.value must_=== 2
-      bus2.publish(3)
-      result.value must_=== 5
-      bus1.publish(5)
-      result.value must_=== 8
-    }
+//    "have flatMap operation" in {
+//      val bus1 = Bus[Int]
+//      val bus2 = Bus[Int]
+//      val view1 = bus1.latest(0)
+//      val view2 = bus2.latest(0)
+//
+//      val result = for {
+//        a <- view1
+//        b <- view2
+//      } yield a + b
+//
+//      System.gc()
+//
+//      result.value must_=== 0
+//      bus1.publish(2)
+//      result.value must_=== 2
+//      bus2.publish(3)
+//      result.value must_=== 5
+//      bus1.publish(5)
+//      result.value must_=== 8
+//    }
 
     "have applyIn operation on two arguments" in {
       val cell1 = Cell[Int](0)
-      val view1 = cell1.map(_ + 1)
+      val view1 = cell1.asView.map(_ + 1)
 
       System.gc()
 
@@ -72,7 +72,7 @@ class ViewSpec extends Specification {
 
     "have applyIn operation on two arguments" in {
       val cell1 = Cell[Int](0)
-      val view1 = cell1.map(_ + 1)
+      val view1 = cell1.asView.map(_ + 1)
 
       System.gc()
 
@@ -82,7 +82,7 @@ class ViewSpec extends Specification {
 
     "have a source that can be folded" in {
       val cell1 = Cell(0)
-      val view1 = cell1.source.foldRight(0)((a, _) => a)
+      val view1 = cell1.asView
       cell1.value = 1
       view1.value must_=== 1
       cell1.value = 2
@@ -107,24 +107,6 @@ class ViewSpec extends Specification {
       result.value must_=== 12
       cell1.value = _ + 20
       result.value must_=== 22
-    }
-
-    "have applyIn operation on two arguments" in {
-      val cell1 = Cell[Int](0)
-      val cell2 = Cell[Int](0)
-      val view1: View[Int] = cell1
-      val view2: View[Int] = cell2
-
-      val result = view1.map[Int => Int](x => y => x + y) ap view2
-      System.gc()
-
-      result.value must_=== 0
-      cell1.value = 2
-      result.value must_=== 2
-      cell2.value = 3
-      result.value must_=== 5
-      cell1.value = 5
-      result.value must_=== 8
     }
 
     "have applyIn operation on three arguments" in {
@@ -172,10 +154,6 @@ class ViewSpec extends Specification {
     "have asView method" in {
       val view = View(1)
       view.value must_== view.asView.value
-    }
-
-    "have closed source if initialised as constant" in {
-      View(1).source must_=== ClosedSource
     }
 
     "have point syntax" in {
