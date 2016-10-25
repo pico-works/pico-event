@@ -9,7 +9,7 @@ import org.pico.disposal.syntax.disposable._
 import org.pico.event.syntax.disposer._
 import org.specs2.mutable.Specification
 
-class VarSpec extends Specification {
+class CellSpec extends Specification {
   "Var" should {
     "have map operation" in {
       val cell1 = Cell(1)
