@@ -4,10 +4,10 @@ import sbt._
 object Build extends sbt.Build {  
   val pico_atomic     = "org.pico"              %%  "pico-atomic"       % "0.2.1"
   val pico_disposal   = "org.pico"              %%  "pico-disposal"     % "1.0.8"
-  val cats_core       = "org.typelevel"         %%  "cats-core"         % "0.7.2"
-  val simulacrum      = "com.github.mpilquist"  %%  "simulacrum"        % "0.8.0"
+//  val cats_core       = "org.typelevel"         %%  "cats-core"         % "0.7.2"
+//  val simulacrum      = "com.github.mpilquist"  %%  "simulacrum"        % "0.8.0"
 
-  val specs2_core     = "org.specs2"            %%  "specs2-core"       % "3.8.4"
+  val specs2_core     = "org.specs2"            %%  "specs2-core"       % "3.8.6"
 
   implicit class ProjectOps(self: Project) {
     def standard(theDescription: String) = {
@@ -17,8 +17,8 @@ object Build extends sbt.Build {
           .settings(description := theDescription)
           .settings(isSnapshot := true)
           .settings(resolvers += Resolver.sonatypeRepo("releases"))
-          .settings(addCompilerPlugin("org.spire-math" % "kind-projector" % "0.8.0" cross CrossVersion.binary))
-          .settings(addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full))
+          .settings(addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary))
+//          .settings(addCompilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full))
     }
 
     def notPublished = self.settings(publish := {}).settings(publishArtifact := false)
@@ -34,7 +34,7 @@ object Build extends sbt.Build {
 
   lazy val `pico-event` = Project(id = "pico-event", base = file("pico-event"))
       .standard("Tiny publish-subscriber library")
-      .libs(pico_atomic, pico_disposal, cats_core)
+      .libs(pico_atomic, pico_disposal) // , cats_core)
       .testLibs(specs2_core)
 
   lazy val all = Project(id = "pico-event-project", base = file("."))
