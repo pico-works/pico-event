@@ -3,7 +3,7 @@ import sbt._
 
 object Build extends sbt.Build {  
   val pico_atomic     = "org.pico"              %%  "pico-atomic"       % "0.2.1"
-  val pico_disposal   = "org.pico"              %%  "pico-disposal"     % "1.0.7"
+  val pico_disposal   = "org.pico"              %%  "pico-disposal"     % "1.0.8"
   val cats_core       = "org.typelevel"         %%  "cats-core"         % "0.7.2"
   val simulacrum      = "com.github.mpilquist"  %%  "simulacrum"        % "0.8.0"
 
