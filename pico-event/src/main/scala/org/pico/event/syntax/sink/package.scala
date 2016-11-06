@@ -2,7 +2,10 @@ package org.pico.event.syntax
 
 import java.util.concurrent.atomic.AtomicReference
 
+import org.pico.atomic.syntax.std.atomicReference._
 import org.pico.event.{ClosedSink, Sink}
+
+import scala.concurrent.ExecutionContext
 
 package object sink {
   implicit class SinkOps_cHdm8Nd[A](val self: Sink[A]) extends AnyVal {
@@ -26,6 +29,23 @@ package object sink {
 
       sink.resets(ClosedSink, refSelf)
       sink.resets(ClosedSink, refThat)
+
+      sink
+    }
+
+    /** Create a sink that handles its message by publishing to the original sink via the specified
+      * execution context.
+      */
+    def coVia(executor: ExecutionContext): Sink[A] = {
+      val selfRef = new AtomicReference(self)
+
+      val sink = Sink[A] { a =>
+        executor.execute(new Runnable {
+          override def run(): Unit = selfRef.value.publish(a)
+        })
+      }
+
+      sink.releases(selfRef)
 
       sink
     }
