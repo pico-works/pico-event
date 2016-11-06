@@ -1,6 +1,6 @@
 package org.pico.event.syntax
 
-import java.util.concurrent.atomic.{AtomicLong, AtomicReference}
+import java.util.concurrent.atomic.AtomicLong
 
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event._
@@ -42,6 +42,21 @@ package object source {
       */
     def update[B](cell: Cell[B])(f: (A, B) => B): AutoCloseable = {
       self.subscribe(a => cell.update(b => f(a, b)))
+    }
+
+    /** Create a sink that handles its message by publishing to the original sink via the specified
+      * execution context.
+      */
+    def via(ec: ExecutionContext): Source[A] = {
+      val bus = Bus[A]
+
+      bus += self.subscribe { a =>
+        ec.execute(new Runnable {
+          override def run(): Unit = bus.publish(a)
+        })
+      }
+
+      bus
     }
   }
 
