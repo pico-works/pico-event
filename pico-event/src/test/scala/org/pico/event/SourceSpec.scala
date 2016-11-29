@@ -4,6 +4,7 @@ import org.pico.disposal.Disposer
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.syntax.disposable._
 import org.pico.event.syntax.source._
+import org.pico.event.syntax.sinkSource._
 import org.specs2.mutable.Specification
 
 class SourceSpec extends Specification {
@@ -87,6 +88,17 @@ class SourceSpec extends Specification {
       v.value must_=== 110
       bus.publish(2)
       v.value must_=== 210
+    }
+
+    "have via method taking a SinkSource" in {
+      val bus1 = Bus[Int]
+      val bus2 = Bus[Int]
+      val bus3: SinkSource[Int, Int] = bus1.via(bus2)
+      val result = bus3.foldRight(List.empty[Int])(_ :: _)
+
+      bus1.publish(1)
+
+      result.value must_=== List(1)
     }
   }
 }
