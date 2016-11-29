@@ -44,24 +44,9 @@ package object source {
       self.subscribe(a => cell.update(b => f(a, b)))
     }
 
-    /** Create a sink that handles its message by publishing to the original sink via the specified
-      * execution context.
-      */
-    def via(ec: ExecutionContext): Source[A] = {
-      val bus = Bus[A]
-
-      bus += self.subscribe { a =>
-        ec.execute(new Runnable {
-          override def run(): Unit = bus.publish(a)
-        })
-      }
-
-      bus
-    }
-
     /** Get a Source that routes a Source via a SinkSource.
       */
-    def viaBus(that: Bus[A]): Source[A] = {
+    def via(that: Bus[A]): Source[A] = {
       that += self into that
       that
     }
@@ -71,6 +56,13 @@ package object source {
     def tap(that: Sink[A]): Source[A] = {
       that += self into that
       self
+    }
+
+    /** Get a Source that routes a Source via a SinkSource.
+      */
+    def viaBus(that: Bus[A]): Source[A] = {
+      that += self into that
+      that
     }
   }
 

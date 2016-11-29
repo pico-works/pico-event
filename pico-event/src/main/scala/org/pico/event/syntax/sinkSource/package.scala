@@ -10,7 +10,7 @@ package object sinkSource {
   implicit class SinkSourceOps_37hUMNo[A, B](val self: SinkSource[A, B]) extends AnyVal {
     /** Get a SinkSource that routes a SinkSource via a SinkSource.
       */
-    def viaBus(that: Bus[B]): SinkSource[A, B] = {
+    def via(that: Bus[B]): SinkSource[A, B] = {
       that += self into that
       SinkSource.from(self, that)
     }
