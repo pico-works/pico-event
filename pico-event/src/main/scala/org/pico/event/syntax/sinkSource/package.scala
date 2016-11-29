@@ -2,18 +2,24 @@ package org.pico.event.syntax
 
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event.syntax.source._
-import org.pico.event.{Bus, SinkSource, Source}
+import org.pico.event.{Bus, Sink, SinkSource, Source}
 
 import scala.concurrent.{ExecutionContext, Future}
 
 package object sinkSource {
-  implicit class SinkSourceOps_mEqamZ3[A, B](val self: SinkSource[A, B]) extends AnyVal {
-    /** Get a SinkSource that routes a SinkSource via another SinkSource.
+  implicit class SinkSourceOps_37hUMNo[A, B](val self: SinkSource[A, B]) extends AnyVal {
+    /** Get a SinkSource that routes a SinkSource via a SinkSource.
       */
-    def via[C](that: SinkSource[B, C]): SinkSource[A, C] = {
-      val joined = SinkSource.from(self, that)
-      joined += self into that
-      joined
+    def viaBus(that: Bus[B]): SinkSource[A, B] = {
+      that += self into that
+      SinkSource.from(self, that)
+    }
+
+    /** Subscribe the Sink to the SinkSource.
+      */
+    def tap(that: Sink[B]): SinkSource[A, B] = {
+      that += self into that
+      self
     }
   }
 

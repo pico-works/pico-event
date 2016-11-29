@@ -3,7 +3,6 @@ package org.pico.event
 import org.pico.disposal.std.autoCloseable._
 import org.pico.disposal.{Closed, Disposer}
 import org.pico.event.std.all._
-import org.pico.event.syntax.hasForeach._
 import org.pico.event.syntax.source._
 import org.specs2.mutable.Specification
 
