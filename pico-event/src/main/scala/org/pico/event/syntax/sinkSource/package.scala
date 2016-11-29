@@ -7,6 +7,16 @@ import org.pico.event.{Bus, SinkSource, Source}
 import scala.concurrent.{ExecutionContext, Future}
 
 package object sinkSource {
+  implicit class SinkSourceOps_mEqamZ3[A, B](val self: SinkSource[A, B]) extends AnyVal {
+    /** Get a SinkSource that routes a SinkSource via another SinkSource.
+      */
+    def via[C](that: SinkSource[B, C]): SinkSource[A, C] = {
+      val joined = SinkSource.from(self, that)
+      joined += self into that
+      joined
+    }
+  }
+
   implicit class SinkSourceOps_iY4kPqc[A, B](val self: SinkSource[A, Future[B]]) extends AnyVal {
     /** Return a source which emits events whenever the futures from the original
       * source complete.  Success values will be emitted on the right and failures
