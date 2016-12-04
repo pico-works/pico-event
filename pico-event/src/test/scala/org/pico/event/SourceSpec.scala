@@ -93,7 +93,7 @@ class SourceSpec extends Specification {
     "have viaBus method taking a SinkSource" in {
       val bus1 = Bus[Int]
       val bus2 = Bus[Int]
-      val bus3: SinkSource[Int, Int] = bus1.viaBus(bus2)
+      val bus3: SinkSource[Int, Int] = bus1.via(bus2)
       val result = bus3.foldRight(List.empty[Int])(_ :: _)
 
       bus1.publish(1)
