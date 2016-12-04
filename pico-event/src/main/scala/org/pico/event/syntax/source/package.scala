@@ -57,13 +57,6 @@ package object source {
       that += self into that
       self
     }
-
-    /** Get a Source that routes a Source via a SinkSource.
-      */
-    def viaBus(that: Bus[A]): Source[A] = {
-      that += self into that
-      that
-    }
   }
 
   implicit class SourceOps_KhVNHpu[A, B](val self: Source[Either[A, B]]) extends AnyVal {
