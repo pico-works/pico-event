@@ -1,5 +1,6 @@
 import sbt.Keys._
 import sbt._
+import tut.Plugin.tutSettings
 
 object Build extends sbt.Build {  
   val pico_atomic     = "org.pico"              %%  "pico-atomic"       % "0.2.1"
@@ -8,15 +9,18 @@ object Build extends sbt.Build {
 
   val specs2_core     = "org.specs2"            %%  "specs2-core"       % "3.8.6"
 
+  def env(name: String): Option[String] = Option(System.getenv(name))
+
   implicit class ProjectOps(self: Project) {
     def standard(theDescription: String) = {
       self
           .settings(scalacOptions in Test ++= Seq("-Yrangepos"))
-          .settings(publishTo := Some("Releases" at "s3://dl.john-ky.io/maven/releases"))
+          .settings(publishTo := env("PICO_PUBLISH_TO").map("Releases" at _))
           .settings(description := theDescription)
           .settings(isSnapshot := true)
           .settings(resolvers += Resolver.sonatypeRepo("releases"))
           .settings(addCompilerPlugin("org.spire-math" % "kind-projector" % "0.9.3" cross CrossVersion.binary))
+          .settings(tutSettings: _*)
     }
 
     def notPublished = self.settings(publish := {}).settings(publishArtifact := false)

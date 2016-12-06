@@ -11,6 +11,8 @@ trait View[+A] extends SimpleDisposer { self =>
   def value: A
 
   def invalidations: Source[Unit]
+
+  lazy val source = this.disposes(invalidations.map(_ => value))
 }
 
 object View {
