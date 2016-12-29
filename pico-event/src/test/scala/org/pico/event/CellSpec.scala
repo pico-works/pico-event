@@ -184,5 +184,18 @@ class CellSpec extends Specification {
       cell1.value must_=== 10
       view1.value must_=== 10
     }
+  
+    "be able to be able to update conditionally" in {
+      val cell1 = Cell(1)
+      val view1 = cell1.asView
+  
+      cell1.updateIf(_ > 5, _ + 9) must_=== None
+      cell1.value must_=== 1
+      view1.value must_=== 1
+      
+      cell1.updateIf(_ < 5, _ + 9) must_=== Some(1 -> 10)
+      cell1.value must_=== 10
+      view1.value must_=== 10
+    }
   }
 }
