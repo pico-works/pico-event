@@ -3,7 +3,7 @@ import sbt._
 import tut.Plugin.tutSettings
 
 object Build extends sbt.Build {  
-  val pico_atomic     = "org.pico"              %%  "pico-atomic"       % "0.2.1"
+  val pico_atomic     = "org.pico"              %%  "pico-atomic"       % "0.3.1"
   val pico_disposal   = "org.pico"              %%  "pico-disposal"     % "1.0.10"
   val cats_core       = "org.typelevel"         %%  "cats-core"         % "0.8.1"
 

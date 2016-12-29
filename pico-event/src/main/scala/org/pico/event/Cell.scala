@@ -11,6 +11,8 @@ trait Cell[A] extends View[A] {
   def value_=(that: A): Unit
 
   def update(f: A => A): (A, A)
+  
+  def updateIf(cond: A => Boolean, f: A => A): Option[(A, A)]
 
   def getAndSet(a: A): A
 
@@ -35,6 +37,12 @@ object Cell {
       override def update(f: A => A): (A, A) = {
         val result = valueRef.update(f)
         invalidations.invalidate()
+        result
+      }
+  
+      override def updateIf(cond: A => Boolean, f: A => A): Option[(A, A)] = {
+        val result = valueRef.updateIf(cond, f)
+        result.foreach(_ => invalidations.invalidate())
         result
       }
 
