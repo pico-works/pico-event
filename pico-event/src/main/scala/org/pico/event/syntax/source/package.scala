@@ -54,7 +54,7 @@ package object source {
     /** Subscribe the Sink to the Source.
       */
     def tap(that: Sink[A]): Source[A] = {
-      that += self into that
+      self += self into that
       self
     }
   }
