@@ -46,7 +46,7 @@ package object source {
 
     /** Get a Source that routes a Source via a SinkSource.
       */
-    def via(that: Bus[A]): Source[A] = {
+    def via[B](that: SinkSource[A, B]): Source[B] = {
       that += self into that
       that
     }
