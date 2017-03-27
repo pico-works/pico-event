@@ -38,7 +38,7 @@ package object sinkSource {
     def completed(implicit ec: ExecutionContext): Source[Either[Throwable, B]] = {
       val bus = Bus[Either[Throwable, B]]
 
-      bus.disposes(self.asSource.scheduled into bus)
+      bus.disposes(self.asSource.completed into bus)
 
       bus
     }

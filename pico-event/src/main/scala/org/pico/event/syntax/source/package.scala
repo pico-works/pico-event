@@ -1,7 +1,10 @@
 package org.pico.event.syntax
 
+import java.io.Closeable
 import java.util.concurrent.atomic.AtomicLong
 
+import cats.kernel.Semigroup
+import cats.{Foldable, Monoid}
 import org.pico.disposal.std.autoCloseable._
 import org.pico.event._
 import org.pico.event.std.all._
@@ -17,13 +20,15 @@ package object source {
       * @param initial The initial value
       * @return The view that will change to contain the latest value emitted by the source
       */
-    def latest(initial: A): View[A] = self.foldRight(initial)((v, _) => v)
+    @inline
+    final def latest(initial: A): View[A] = self.foldRight(initial)((v, _) => v)
 
     /** Create a view that counts the number of events that have been emitted.
       *
       * @return The view that will change to contain the latest value emitted by the source
       */
-    def eventCount: View[Long] = {
+    @inline
+    final def eventCount: View[Long] = {
       new View[Long] {
         val data = new AtomicLong(0L)
 
@@ -40,22 +45,87 @@ package object source {
 
     /** Update a cell with events using a combining function
       */
-    def update[B](cell: Cell[B])(f: (A, B) => B): AutoCloseable = {
+    @inline
+    final def update[B](cell: Cell[B])(f: (A, B) => B): AutoCloseable = {
       self.subscribe(a => cell.update(b => f(a, b)))
     }
 
     /** Get a Source that routes a Source via a SinkSource.
       */
-    def via[B](that: SinkSource[A, B]): Source[B] = {
+    @inline
+    final def via[B](that: SinkSource[A, B]): Source[B] = {
       that += self into that
       that
     }
 
     /** Subscribe the Sink to the Source.
       */
-    def tap(that: Sink[A]): Source[A] = {
+    @inline
+    final def tap(that: Sink[A]): Source[A] = {
       self += self into that
       self
+    }
+
+    /** Fold the event source into a value given the value's initial state.
+      *
+      * @param f The folding function
+      * @param initial The initial state
+      * @tparam B Type of the new value
+      * @return The value.
+      */
+    @inline
+    final def foldLeft[B](initial: B)(f: (B, A) => B): View[B] = {
+      val cell = Cell[B](initial)
+
+      cell.disposes(self.subscribe(v => cell.update(a => f(a, v))))
+
+      cell
+    }
+
+    /** Fold the event source into a cell.
+      *
+      * @param f The folding function
+      * @tparam B Type of the new value
+      * @return Subscription, which when closed stops updating the cell
+      */
+    @inline
+    final def foldRightInto[B](cell: Cell[B])(f: (A, => B) => B): Closeable = {
+      self.subscribe { a =>
+        cell.update(b => f(a, b))
+      }
+    }
+
+    /** Fold the event source into a cell.
+      *
+      * @param f The folding function
+      * @tparam B Type of the new value
+      * @return Subscription, which when closed stops updating the cell
+      */
+    @inline
+    final def foldLeftInto[B](cell: Cell[B])(f: (B, A) => B): Closeable = {
+      self.subscribe { a =>
+        cell.update(b => f(b, a))
+      }
+    }
+
+    /** Fold the event source into a cell using Monoid.combine
+      *
+      * @return The view containing folded value.
+      */
+    @inline
+    final def combined(implicit ev: Monoid[A]): View[A] = {
+      self.foldLeft(Monoid[A].empty)(Monoid[A].combine)
+    }
+
+    /** Fold the event source using Semigroup.combine into a cell.
+      *
+      * @return Subscription, which when closed stops updating the cell
+      */
+    @inline
+    final def combinedInto(cell: Cell[A])(implicit ev: Semigroup[A]): Closeable = {
+      self.subscribe { a =>
+        cell.update(ev.combine(_, a))
+      }
     }
   }
 
@@ -67,7 +137,8 @@ package object source {
       * @param sink The sink to which left side of emitted events will be published
       * @return The source that emits the right side of emitted events
       */
-    def divertLeft(sink: Sink[A]): Source[B] = {
+    @inline
+    final def divertLeft(sink: Sink[A]): Source[B] = {
       new SimpleBus[B] { temp =>
         temp += self.subscribe {
           case Right(rt) => temp.publish(rt)
@@ -83,7 +154,8 @@ package object source {
       * @param sink The sink to which right side of emitted events will be published
       * @return The source that emits the left side of emitted events
       */
-    def divertRight(sink: Sink[B]): Source[A] = {
+    @inline
+    final def divertRight(sink: Sink[B]): Source[A] = {
       new SimpleBus[A] { temp =>
         temp += self.subscribe {
           case Right(rt) => sink.publish(rt)
@@ -94,11 +166,13 @@ package object source {
 
     /** New Source propagating left of Either.
       */
-    def justLeft: Source[A] = divertRight(ClosedSink)
+    @inline
+    final def justLeft: Source[A] = divertRight(ClosedSink)
 
     /** New Source propagating right of Either.
       */
-    def justRight: Source[B] = divertLeft(ClosedSink)
+    @inline
+    final def justRight: Source[B] = divertLeft(ClosedSink)
   }
 
   implicit class SourceOps_iY4kPqc[A](val self: Source[Future[A]]) extends AnyVal {
@@ -106,14 +180,8 @@ package object source {
       * source complete.  Success values will be emitted on the right and failures
       * will be emitted on the left.
       */
-    @deprecated("Use completed instead")
-    def scheduled(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = completed
-
-    /** Return a source which emits events whenever the futures from the original
-      * source complete.  Success values will be emitted on the right and failures
-      * will be emitted on the left.
-      */
-    def completed(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = {
+    @inline
+    final def completed(implicit ec: ExecutionContext): Source[Either[Throwable, A]] = {
       val bus = Bus[Either[Throwable, A]]
 
       bus.disposes(self.subscribe(_.completeInto(bus)))
@@ -125,14 +193,16 @@ package object source {
   implicit class SourceOps_ZWi7qoi[A](val self: Source[Option[A]]) extends AnyVal {
     /** Propagate Some value as Right and None as the provided Left value.
       */
-    def right[B](leftValue: => B): Source[Either[B, A]] = self.map {
+    @inline
+    final def right[B](leftValue: => B): Source[Either[B, A]] = self.map {
       case Some(v) => Right(v)
       case None => Left(leftValue)
     }
 
     /** Propagate Some value as Left and None as the provided Right value.
       */
-    def left[B](rightValue: => B): Source[Either[A, B]] = self.map {
+    @inline
+    final def left[B](rightValue: => B): Source[Either[A, B]] = self.map {
       case Some(v) => Left(v)
       case None => Right(rightValue)
     }
@@ -143,7 +213,8 @@ package object source {
   }
 
   implicit class SourceOps_r8pPKQJ(val self: Source[Long]) extends AnyVal {
-    def sum: View[Long] = {
+    @inline
+    final def sum: View[Long] = {
       val cell = LongCell(0L)
 
       cell.disposes(self.subscribe(cell.addAndGet(_)))
@@ -153,7 +224,8 @@ package object source {
   }
 
   implicit class SourceOps_iAPaWug(val self: Source[Int]) extends AnyVal {
-    def sum: View[Int] = {
+    @inline
+    final def sum: View[Int] = {
       val cell = IntCell(0)
 
       cell.disposes(self.subscribe(cell.addAndGet(_)))
